@@ -1,0 +1,70 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+
+	<Windows>
+
+		<!--
+			The arrow over the player ( CPlusCrowdFilter.lua makes one window from
+			it, once ). The shape of Default's MobileArrow ( Textures/Textures.xml:194- )
+			under a name of its own: Default makes and destroys MobileArrow for the
+			creature under the mouse ( Interface.lua:1152-1218 ), and other modules
+			may put arrows of their own from templates of their own. This one is
+			kept apart from them all, so that none of them moves or hides another.
+		-->
+		<Window name="CPlusCrowdSelfArrowTemplate" handleinput="false" layer="popup">
+			<Size>
+				<AbsPoint x="180" y="300" />
+			</Size>
+			<Windows>
+				<AnimatedImage name="$parentAnim" fps="15" texture="OverheadArrow">
+					<Size>
+						<AbsPoint x="180" y="300" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="0" />
+						</Anchor>
+					</Anchors>
+					<AnimFrames>
+						<AnimFrame id="1" x="0" y="0" />
+						<AnimFrame id="2" x="190" y="0" />
+						<AnimFrame id="3" x="380" y="0" />
+						<AnimFrame id="4" x="570" y="0" />
+						<AnimFrame id="5" x="760" y="0" />
+						<AnimFrame id="6" x="950" y="0" />
+						<AnimFrame id="7" x="1140" y="0" />
+						<AnimFrame id="8" x="1330" y="0" />
+						<AnimFrame id="9" x="1520" y="0" />
+						<AnimFrame id="10" x="1710" y="0" />
+						<AnimFrame id="11" x="1900" y="0" />
+						<AnimFrame id="12" x="2090" y="0" />
+						<AnimFrame id="13" x="2280" y="0" />
+						<AnimFrame id="14" x="2470" y="0" />
+						<AnimFrame id="15" x="2660" y="0" />
+						<AnimFrame id="16" x="2850" y="0" />
+						<AnimFrame id="17" x="3040" y="0" />
+						<AnimFrame id="18" x="3230" y="0" />
+						<AnimFrame id="19" x="3420" y="0" />
+						<AnimFrame id="20" x="3610" y="0" />
+						<AnimFrame id="21" x="3800" y="0" />
+						<AnimFrame id="22" x="3990" y="0" />
+						<AnimFrame id="23" x="4180" y="0" />
+						<AnimFrame id="24" x="4370" y="0" />
+						<AnimFrame id="25" x="4560" y="0" />
+						<AnimFrame id="26" x="4750" y="0" />
+						<AnimFrame id="27" x="4940" y="0" />
+						<AnimFrame id="28" x="5130" y="0" />
+						<AnimFrame id="29" x="5320" y="0" />
+						<AnimFrame id="30" x="5510" y="0" />
+						<AnimFrame id="31" x="0" y="310" />
+						<AnimFrame id="32" x="190" y="310" />
+						<AnimFrame id="33" x="380" y="310" />
+						<AnimFrame id="34" x="570" y="310" />
+						<AnimFrame id="35" x="760" y="310" />
+						<AnimFrame id="36" x="950" y="310" />
+					</AnimFrames>
+				</AnimatedImage>
+			</Windows>
+		</Window>
+
+	</Windows>
+</Interface>

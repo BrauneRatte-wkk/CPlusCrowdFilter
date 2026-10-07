@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>混雑時のフィルター 使い方</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f6f7; --panel: #ffffff; --ink: #1d2a2e; --sub: #5b6b70; --line: #d9e1e3;
+    --accent: #1e828c; --accent-soft: #e3f2f3; --warn: #b35c00; --warn-soft: #fff1e0;
+    --font: "Yu Gothic UI", "Meiryo", "Hiragino Sans", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #121719; --panel: #1b2225; --ink: #e4eaec; --sub: #9aa9ae; --line: #33414a;
+      --accent: #56c1cb; --accent-soft: #163b40; --warn: #f2a453; --warn-soft: #3b2a15;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.75 var(--font); }
+  main { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 26px; margin: 8px 0 4px; }
+  .lead { color: var(--sub); margin: 0 0 20px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  nav.toc { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  .note { background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 16px; margin: 12px 0; }
+  .note b { color: var(--warn); }
+  ol.steps > li { margin-bottom: 10px; }
+  code, .path { font-family: Consolas, "BIZ UDGothic", monospace; font-size: 13.5px; background: var(--accent-soft); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+  pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 13.5px/1.6 Consolas, "BIZ UDGothic", monospace; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; background: var(--panel); }
+  th, td { text-align: left; padding: 7px 10px; border: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--accent-soft); font-weight: 600; white-space: nowrap; }
+  figure { margin: 16px 0; }
+  figure svg { width: 100%; height: auto; display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  svg text { fill: var(--ink); font-family: var(--font); font-size: 13px; }
+  svg .sub { fill: var(--sub); font-size: 11.5px; }
+  svg .stop { fill: var(--warn); }
+  svg .node { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  svg .file { fill: var(--panel); stroke: var(--sub); stroke-width: 1.2; stroke-dasharray: 4 3; }
+  svg .arrow { stroke: var(--ink); stroke-width: 1.5; fill: none; marker-end: url(#head); }
+  svg .skip { stroke: var(--sub); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; marker-end: url(#head); }
+  svg .lab { font-size: 11.5px; }
+  footer { margin-top: 48px; color: var(--sub); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>混雑時のフィルター 使い方</h1>
+  <p class="lead">CLifeUI に足して使う、非公式の追加機能「CPlusCrowdFilter（混雑時のフィルター）」の入れ方と使い方です。</p>
+  <div class="note"><b>CLifeUI が必須です。</b>CLifeUI のフォルダの中に置き、CLifeUI のモジュールの後に読み込まれて働く作りなので、CLifeUI を入れていない状態や、ほかのカスタム UI では動きません。先に CLifeUI を入れて、動くことを確かめてから入れてください。CLifeUI は、作者様の公式ページ（<a href="https://uo.clife.work/uosa-custom-ui-clifeui/">https://uo.clife.work/uosa-custom-ui-clifeui/</a>）の手順で入れてください。</div>
+
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#what">これは何か</a></li>
+      <li><a href="#parts">しくみ（CLifeUI との関係）</a></li>
+      <li><a href="#env">動く環境</a></li>
+      <li><a href="#install">入れ方</a></li>
+      <li><a href="#use">使い方</a></li>
+      <li><a href="#safety">安全について</a></li>
+      <li><a href="#remove">アンインストール</a></li>
+      <li><a href="#notes">注意点・細かい仕様</a></li>
+      <li><a href="#terms">作り方と利用条件</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="what">1. これは何か</h2>
+  <p>大規模なイベントのように人が多い場所で、画面に出る物を減らしたり、自分を見つけやすくしたりする機能の集まりです。どれもアイコンで ON／OFF でき、初めは OFF です（自分の頭上の窓の付け直しだけは、いつも働きます）。</p>
+  <table>
+    <tr><th>機能</th><th>すること</th></tr>
+    <tr><td>味方ダメージ 表示切替</td><td>ON の間、味方（青ネーム）が受けたダメージの数字を出しません。自分と自分のペット・召喚のダメージは出します。</td></tr>
+    <tr><td>オブハン フィルタ切替</td><td>ON の間、オブハン（物の名前の札）を、敵（灰・赤ネーム）と自分のペット・召喚だけにします。</td></tr>
+    <tr><td>頭上の詠唱 出し分け</td><td>頭上に出る呪文の詠唱を、話した人で出し分けます（全員／自分とパーティ／自分だけ／全部隠す）。</td></tr>
+    <tr><td>自分の矢印</td><td>ON の間、自分の頭の上に水色の矢印を出し続けます。人の多い所で自分を見失わないためのものです。</td></tr>
+    <tr><td>自分の頭上の窓の付け直し</td><td>リコールなどのあとに自分の発言や詠唱が頭上に出なくなることがあるのを、自分が話すたびに直します。切り替えはありません。</td></tr>
+  </table>
+  <p>画面の表示を変えるだけです。ゲームの操作を自動で行うことはありません（<a href="#safety">安全について</a>）。</p>
+
+  <h2 id="parts">2. しくみ（CLifeUI との関係）</h2>
+  <p>混雑時のフィルターは、CLifeUI のファイルを書き換えません。CLifeUI の横に別のフォルダとして置き、ゲームの標準の UI の関数のうち、ダメージの数字・頭上の文・オブハンの一覧の 3 つに、外側から薄い処理をかぶせます。ダメージの数字と頭上の文は、CLifeUI（ClfDamageMod・ClfTextParse）も自分の処理に差し替えているので、フィルターはその外側に入ります（そのために、CLifeUI のモジュール ClfCommon・ClfDamageMod・ClfTextParse より後に読み込まれるようにしてあります）。オブハンの一覧は、CLifeUI（ClfCommon）が札を作るたびに呼んで受け取る関数で、CLifeUI はこれを差し替えません。フィルターが絞った一覧を、CLifeUI がそのまま受け取ります。</p>
+  <figure>
+    <svg viewBox="0 0 900 480" role="img" aria-label="ダメージの数字・頭上の文・オブハンの一覧は、混雑時のフィルターを通ってから CLifeUI と標準の UI へ渡る。フィルターが OFF なら何も止めずに渡し、ON なら隠す物だけをそこで止める。自分の矢印は CLifeUI を通らず、自前の窓で出す。">
+      <defs>
+        <marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <text x="95" y="50" text-anchor="middle" class="sub">届いたもの</text>
+      <text x="315" y="50" text-anchor="middle" class="sub">混雑時のフィルター</text>
+      <text x="565" y="50" text-anchor="middle" class="sub">CLifeUI</text>
+      <text x="795" y="50" text-anchor="middle" class="sub">標準の UI（画面に出す）</text>
+
+      <rect class="file" x="20" y="70" width="150" height="90" rx="8"/>
+      <text x="34" y="96">ダメージの数字</text>
+      <text x="34" y="120" class="sub">だれかがダメージを</text>
+      <text x="34" y="140" class="sub">受けた</text>
+      <rect class="node" x="210" y="70" width="210" height="90" rx="10"/>
+      <text x="224" y="96">ダメージのフィルター</text>
+      <text x="224" y="120" class="sub stop">ON: 青ネームの分を止める</text>
+      <text x="224" y="140" class="sub">OFF: そのまま渡す</text>
+      <rect class="node" x="460" y="70" width="210" height="90" rx="10"/>
+      <text x="474" y="96">ClfDamageMod</text>
+      <text x="474" y="120" class="sub">ダメージ一覧・チャット・</text>
+      <text x="474" y="140" class="sub">ファイルの記録・数字の演出</text>
+      <rect class="node" x="710" y="70" width="170" height="90" rx="10"/>
+      <text x="724" y="96">数字を出す</text>
+
+      <rect class="file" x="20" y="175" width="150" height="90" rx="8"/>
+      <text x="34" y="201">頭上の文</text>
+      <text x="34" y="225" class="sub">会話・詠唱</text>
+      <rect class="node" x="210" y="175" width="210" height="90" rx="10"/>
+      <text x="224" y="201">頭上の詠唱 出し分け</text>
+      <text x="224" y="225" class="sub stop">隠すと決めた詠唱を止める</text>
+      <text x="224" y="245" class="sub">自分の発言なら窓を付け直す</text>
+      <rect class="node" x="460" y="175" width="210" height="90" rx="10"/>
+      <text x="474" y="201">ClfTextParse</text>
+      <text x="474" y="225" class="sub">一部の文を隠す・整える</text>
+      <rect class="node" x="710" y="175" width="170" height="90" rx="10"/>
+      <text x="724" y="201">頭上に文を出す</text>
+
+      <rect class="file" x="20" y="280" width="150" height="90" rx="8"/>
+      <text x="34" y="306">オブハンの一覧</text>
+      <text x="34" y="330" class="sub">標準の UI が集めた</text>
+      <text x="34" y="350" class="sub">近くの物</text>
+      <rect class="node" x="210" y="280" width="210" height="90" rx="10"/>
+      <text x="224" y="306">オブハンのフィルター</text>
+      <text x="224" y="330" class="sub stop">ON: 敵とペットだけに絞る</text>
+      <text x="224" y="350" class="sub">OFF: そのまま渡す</text>
+      <rect class="node" x="460" y="280" width="210" height="90" rx="10"/>
+      <text x="474" y="306">ClfCommon</text>
+      <text x="474" y="330" class="sub">一覧から札を作る・</text>
+      <text x="474" y="350" class="sub">文字の絞り込み・自動で拾う</text>
+      <rect class="node" x="710" y="280" width="170" height="90" rx="10"/>
+      <text x="724" y="306">札を出す</text>
+
+      <rect class="node" x="210" y="395" width="210" height="70" rx="10"/>
+      <text x="224" y="421">自分の矢印</text>
+      <text x="224" y="445" class="sub">自前の窓（ON の間だけ）</text>
+      <rect class="node" x="710" y="395" width="170" height="70" rx="10"/>
+      <text x="724" y="421">頭の上に矢印</text>
+      <path class="skip" d="M422,430 L706,430"/>
+      <text x="565" y="422" text-anchor="middle" class="lab">CLifeUI は通らない</text>
+
+      <path class="arrow" d="M170,115 L207,115" style="color: var(--ink)"/>
+      <path class="arrow" d="M420,115 L457,115" style="color: var(--ink)"/>
+      <path class="arrow" d="M670,115 L707,115" style="color: var(--ink)"/>
+      <path class="arrow" d="M170,220 L207,220" style="color: var(--ink)"/>
+      <path class="arrow" d="M420,220 L457,220" style="color: var(--ink)"/>
+      <path class="arrow" d="M670,220 L707,220" style="color: var(--ink)"/>
+      <path class="arrow" d="M170,325 L207,325" style="color: var(--ink)"/>
+      <path class="arrow" d="M420,325 L457,325" style="color: var(--ink)"/>
+      <path class="arrow" d="M670,325 L707,325" style="color: var(--ink)"/>
+    </svg>
+    <figcaption>左から右へ流れます。<b>OFF の間</b>、フィルターは何も止めずにそのまま CLifeUI へ渡すので、CLifeUI の動きはフィルターを入れていないときと同じです。<b>ON の間</b>は、フィルターが先に見て、隠すと決めた物（赤字）だけをそこで止め、残りを CLifeUI へ渡します。止めた物は CLifeUI にも届かないので、たとえば隠した青ネームのダメージは CLifeUI のダメージ一覧にも入りません。自分の矢印は自前の窓で、CLifeUI を通りません。</figcaption>
+  </figure>
+  <p>ほかに、行動ウィンドウでは、CLifeUI がアイコンを足したあとに、分類「CPlus」と 4 つのアイコンを足します。CLifeUI のアイコンはそのままです。</p>
+
+  <h3>CLifeUI を自分で変えているとき</h3>
+  <ul>
+    <li>フィルターは、UI を読み込んだときに、その時点の関数の外側にかぶさります。ClfCommon・ClfDamageMod・ClfTextParse を自分で書き換えていても、ダメージの数字と頭上の文は、関数の名前が同じなら書き換えた処理の外側にかぶさり、OFF の間はその処理へそのまま渡します。オブハンは、札を作る処理が一覧の関数を名前で呼んでいれば、絞った一覧が渡ります。</li>
+    <li>ゲームの途中で、別の改造が同じ関数を差し替え直すと、フィルターが外れて働かなくなることがあります。</li>
+    <li>かぶせる相手の関数が見つからないときは、チャットに <code>CPlusCrowdFilter : hook missing (…)</code> と出て、その機能だけが働きません。</li>
+  </ul>
+
+  <h2 id="env">3. 動く環境</h2>
+  <table>
+    <tr><th>ゲーム</th><td>Ultima Online Enhanced Client。日本語のクライアントで確かめています（文言は日本語と英語があります）。</td></tr>
+    <tr><th>カスタム UI</th><td>CLifeUI（必須）。公開されている版で確かめています。CLifeUI のフォルダの中に置き、CLifeUI のモジュール（ClfCommon・ClfDamageMod・ClfTextParse）の後に読み込まれる作りなので、CLifeUI が無いと動きません。</td></tr>
+    <tr><th>Windows</th><td>ゲームが動く Windows なら、追加で入れるものはありません。</td></tr>
+  </table>
+
+  <h2 id="install">4. 入れ方</h2>
+  <ol class="steps">
+    <li><b>zip を展開します。</b><code>CPlusCrowdFilter-0.1.zip</code> を展開すると、<code>ClfMods\CPlusCrowdFilter</code> フォルダができます。</li>
+    <li><b>CLifeUI の中に入れます。</b><code>ClfMods\CPlusCrowdFilter</code> フォルダを、CLifeUI の <code>ClfMods</code> フォルダの中に、フォルダごと入れます。
+<pre>C:\Program Files (x86)\Electronic Arts\Ultima Online Enhanced\
+  UserInterface\
+    &lt;CLifeUI のフォルダ&gt;\    ← 名前は自由（公式の手順では ClifeUI-master）
+      ClfMods\
+        ClfCommon\          ← CLifeUI のもの
+        …
+        CPlusCrowdFilter\   ← ここに入れる（フォルダごと）</pre>
+      Program Files の下なので、コピーのときに管理者の確認が出ます。</li>
+    <li><b>ゲームを起動します。</b>起動中なら、UI を読み直します（マクロで <code>script InterfaceCore.ReloadUI()</code>）。</li>
+    <li><b>アイコンをホットバーに置きます。</b>行動ウィンドウの分類「CPlus」に、4 つのアイコンがあります。使うものをホットバーに置きます。
+      <table>
+        <tr><th>アイコンの絵の文字</th><th>名前</th></tr>
+        <tr><td>青ダ／切替</td><td>味方ダメージ 表示切替</td></tr>
+        <tr><td>オブハン／切替</td><td>オブハン フィルタ切替</td></tr>
+        <tr><td>詠唱／表示</td><td>頭上の詠唱 出し分け</td></tr>
+        <tr><td>自分／矢印</td><td>自分の矢印</td></tr>
+      </table>
+      家の記録（CPlusHomeRecord）も入れているときは、同じ「CPlus」の分類に並びます。</li>
+  </ol>
+
+  <h2 id="use">5. 使い方</h2>
+  <p>アイコンを押すたびに切り替わり、頭の上とチャット欄に今の状態が出ます。どちらも自分の画面の表示だけで、ほかのプレイヤーには見えません。状態はキャラクターごとに保存され、ログインし直しても、UI を読み直しても続きます。</p>
+
+  <h3>味方ダメージ 表示切替</h3>
+  <ul>
+    <li>押すたびに ON／OFF。頭の上とチャット欄に「味方ダメージフィルタ: ON」「味方ダメージフィルタ: OFF」と出ます。</li>
+    <li>ON の間、ダメージを受けた相手の名前の色が青なら、その数字を出しません。頭の上の数字だけでなく、ダメージの一覧やチャットにも出ません。</li>
+    <li>自分と、自分のペット・召喚が受けたダメージは、青でも出します。</li>
+    <li>名前の色が分からない相手と、青以外（緑・灰・赤など）の相手のダメージは出します。</li>
+  </ul>
+
+  <h3>オブハン フィルタ切替</h3>
+  <ul>
+    <li>押すたびに ON／OFF。頭の上とチャット欄に「オブハンフィルタ: ON」「オブハンフィルタ: OFF」と出ます。</li>
+    <li>ON の間、オブハン（Ctrl＋Shift などで出す、物の名前の札）を、生物のうち次のものだけにします: 自分のペット・召喚、名前が灰色の相手、名前が赤の相手。灰色でも、犯罪者（犯罪をして灰色になったプレイヤー）の札は出ません。</li>
+    <li>ほかの生物と、アイテム・死体の札は出ません。</li>
+    <li>オブハンを出しているときに切り替えると、その場で出し直します。</li>
+  </ul>
+
+  <h3>頭上の詠唱 出し分け</h3>
+  <p>押すたびに、次の 4 つを順に巡ります。初めは OFF です。</p>
+  <table>
+    <tr><th>状態</th><th>頭上に出す詠唱</th><th>押したときに出る文（頭の上とチャット欄）</th></tr>
+    <tr><td>OFF</td><td>全員分（ふつうと同じ）</td><td>詠唱: OFF</td></tr>
+    <tr><td>自分とパーティ</td><td>自分と、パーティの仲間の分</td><td>詠唱: 自分とパーティ</td></tr>
+    <tr><td>自分だけ</td><td>自分の分</td><td>詠唱: 自分だけ</td></tr>
+    <tr><td>全部隠す</td><td>出しません（自分のも）</td><td>詠唱: 全部隠す</td></tr>
+  </table>
+  <ul>
+    <li>隠すのは、頭上に出る呪文の言葉だけです。呪文でない会話は、どの状態でも出ます。チャット欄には、どの状態でも全部出ます。</li>
+    <li>出す相手に入らない人の詠唱は、ほかのプレイヤー・コンピュータの敵・ペットを区別せずに隠します。</li>
+    <li>ゲームの設定にある標準の「頭上の詠唱呪文を非表示」が入っていると、この切り替えに関係なく全員分が隠れます。そのときにアイコンを押すと、頭の上とチャット欄に「（標準の『頭上の詠唱呪文を非表示』が入っているので全部隠れます）」と添えて知らせます。</li>
+    <li>OFF 以外の状態でログインしたときは、チャットに今の状態が 1 行出ます。</li>
+  </ul>
+
+  <h3>自分の矢印</h3>
+  <ul>
+    <li>押すたびに ON／OFF。頭の上とチャット欄に「自分の矢印: ON」「自分の矢印: OFF」と出ます。</li>
+    <li>ON の間、自分の頭の上に水色の矢印を出し続けます。リコールなどで場所が変わっても、2 秒以内に付け直して出し続けます。</li>
+    <li>矢印は自分だけです。仲間やペットには付けません。</li>
+    <li>ログインの直後などで自分の位置が取れないときに ON にすると、チャットに「自分の矢印: 自分の位置が取れないので、今は出せません」と出ます。ON のままなので、位置が取れるようになれば出ます。</li>
+    <li>OFF の間は何もしません。</li>
+  </ul>
+
+  <h3>自分の頭上の窓の付け直し（切り替えなし）</h3>
+  <p>リコールなどのあと、自分の発言や詠唱が頭上に出なくなり、UI を読み直すまで直らないことがあります。この機能は、自分が話すたびに頭上の窓を付け直して、これを防ぎます。いつも働いていて、切り替えはありません。ほかの人の頭上の窓には触りません。</p>
+
+  <h3>マクロから使う</h3>
+  <p>アイコンの代わりに、マクロに次の 1 行（<code>script</code> で始まる行）を書いても使えます。</p>
+  <table>
+    <tr><th>機能</th><th>マクロに書く行</th></tr>
+    <tr><td>味方ダメージ 表示切替</td><td><code>script CPlusCrowdFilter.toggleDamage()</code></td></tr>
+    <tr><td>オブハン フィルタ切替</td><td><code>script CPlusCrowdFilter.toggleHandles()</code></td></tr>
+    <tr><td>頭上の詠唱 出し分け</td><td><code>script CPlusCrowdFilter.cycleSpells()</code></td></tr>
+    <tr><td>自分の矢印</td><td><code>script CPlusCrowdFilter.toggleSelfArrow()</code></td></tr>
+  </table>
+
+  <h2 id="safety">6. 安全について</h2>
+  <ul>
+    <li>ゲームのクライアントを書き換えません。Enhanced Client が公式に用意しているカスタム UI の仕組みの中で動きます。</li>
+    <li>ゲームのメモリを外から読んだり書いたりしません。</li>
+    <li>ゲームとサーバの間の通信を、読んだり書き換えたりしません。このソフトからサーバへ何かを送ることもありません。</li>
+    <li>ゲームの操作を自動で行いません。ボタンを押す・アイテムを使う・キャラクターを動かすといった操作はせず、画面に出す物を減らすことと、矢印を表示することだけをします。</li>
+    <li>CLifeUI のファイルは書き換えません。ゲームの標準の UI の関数を外から包んで、表示する前に出すか出さないかを決めます。フォルダを消せば、元の動きに戻ります。</li>
+    <li>ファイルを書き出しません。保存するのは、各機能の ON／OFF だけです（<a href="#remove">ゲームの設定に残るもの</a>）。</li>
+  </ul>
+  <p>配布前の検査: 配る zip は、公開する前に ESET で検査しています。検査した日と検出エンジンの版、zip の SHA-256 は、GitHub のリリースの説明に書いてあります。</p>
+
+  <h2 id="remove">7. アンインストール</h2>
+  <ol class="steps">
+    <li>先にホットバーから、置いたアイコンを外します（残すと、押しても何も起きないアイコンになります）。</li>
+    <li>CLifeUI の <code>ClfMods\CPlusCrowdFilter</code> フォルダを消します。次の起動から読み込まれません。</li>
+  </ol>
+  <h3>ゲームの設定に残るもの</h3>
+  <p>次の値をゲームの設定に保存します。フォルダを消しても残りますが、読む物が無くなるので、ゲームの動きには影響しません。</p>
+  <p>キャラクターごとの設定のファイル: <code>ドキュメント\EA Games\&lt;ゲームの名前&gt;\User Data\&lt;アカウント&gt;\&lt;シャード&gt;\&lt;キャラクター名&gt;</code>（拡張子の無い XML のファイル）</p>
+  <table>
+    <tr><th>ファイルの中の場所</th><th>名前</th><th>中身</th></tr>
+    <tr><td>CharacterSettings → Options → UIVariables の BoolVar</td><td><code>CPlusCrowdFilterDamage</code></td><td>味方ダメージ 表示切替の ON／OFF</td></tr>
+    <tr><td>同じ所の BoolVar</td><td><code>CPlusCrowdFilterHandles</code></td><td>オブハン フィルタ切替の ON／OFF</td></tr>
+    <tr><td>同じ所の NumberVar</td><td><code>CPlusCrowdFilterSpellMode</code></td><td>頭上の詠唱 出し分けの状態（0 OFF・1 自分とパーティ・2 自分だけ・3 全部隠す）</td></tr>
+    <tr><td>同じ所の BoolVar</td><td><code>CPlusCrowdFilterSelfArrow</code></td><td>自分の矢印の ON／OFF</td></tr>
+    <tr><td>CharacterSettings → Interface → Hotbars の UserAction</td><td>id が 6015・6016・6033・6034</td><td>ホットバーに置いたアイコン（ホットバーから外せば消えます）</td></tr>
+  </table>
+  <p>ほかに、ゲームがモジュールごとに作る <code>User Data\CPlusCrowdFilter\ModSettings.xml</code> が残ります。中身は、モジュールが有効かどうか・最後に読んだ版・行動ウィンドウの大きさなどの窓の設定です（このファイルは丸ごと消してかまいません）。</p>
+  <p>キャラクターの設定のファイルは、ほかの UI の設定と同じファイルなので、手で書き換えるのはおすすめしません。書き換えるなら、ゲームを閉じてから、ファイルをコピーしたうえで行ってください。</p>
+
+  <h2 id="notes">8. 注意点・細かい仕様</h2>
+  <ul>
+    <li><b>オブハン フィルタと自動で拾う機能:</b> CLifeUI の、オブハンの付いたアイテムを拾う機能は、ON の間はアイテムの札が出ないので拾いません。拾うときは OFF にしてください。</li>
+    <li><b>ダメージの色の判定:</b> 名前の色は、ゲームが持っている相手の情報から読みます。まだ読めていない相手のダメージは出します。</li>
+    <li><b>処理の重さ:</b> 各フィルターは、ダメージの数字・オブハン・頭上の文が出るときに、出すかどうかを決めるだけです。自分の矢印は ON の間だけ 2 秒ごとに付け直し、OFF の間は何もしません。</li>
+    <li><b>うまく動かないとき:</b> かぶせる相手の関数が見つからないときは、チャットに <code>CPlusCrowdFilter : hook missing (…)</code> と出て、その機能は働きません（ゲームのパブリッシュで標準の UI が変わったときなど）。フィルターの判定の途中でエラーが出たときは、隠さずにそのまま出し、チャットに 1 回だけ知らせます。</li>
+    <li><b>ほかの改造との重なり:</b> CLifeUI を自分で変えているときや、同じ標準の関数を書き換えるほかの改造を一緒に入れているときは、「<a href="#parts">しくみ</a>」の「CLifeUI を自分で変えているとき」を見てください。</li>
+  </ul>
+
+  <h2 id="terms">9. 作り方と利用条件</h2>
+  <ul>
+    <li>このソフトは、Anthropic の Claude Code（Claude Opus 5 と Claude Opus 5.5）で、コードをすべて作りました。作者は Lua などのコードを読めません。作者が行ったのは、仕様を決めることと、ゲームでの動作の確認だけです。</li>
+    <li>Claude Code の複数のセッションに役割を分けて作りました。設計と判断を受け持つセッションが仕様をまとめて作業を指示し、実装のセッションが作り、別のセッションが確かめ、見つかったことを直す、を機能ごとに繰り返しました。</li>
+    <li>無料です。使う・改変する・配り直すのは自由です。販売はできません。</li>
+    <li>無保証です。このソフトを使って起きたことに、作者は一切の責任を負いません。</li>
+    <li>サポートはありません。不具合に気づいたときの連絡先: braunerattewkk ＠ gmail.com（＠ は半角の @ にしてください。お返事はお約束できません）</li>
+    <li>CLifeUI の作者様・Electronic Arts・Broadsword とは関係ありません。</li>
+    <li>自己責任でお使いください。Ultima Online の規約に沿うように作っていますが、規約についての判断は各自で行ってください。</li>
+  </ul>
+  <h3>フォントについて</h3>
+  <p>アイコンの文字は、CLifeUI に入っているフォント Mgen+（ムゲンプラス）で描いています。Mgen+ は自家製フォント工房のフォント（<a href="http://jikasei.me/font/mgenplus/">http://jikasei.me/font/mgenplus/</a>）で、SIL Open Font License 1.1 のもとで使用しています。</p>
+  <h3>商標について</h3>
+  <p>記載されている会社名・製品名は、各社の商標または登録商標です。</p>
+  <h3>Ultima Online に関するコピーライトとリーガル情報</h3>
+  <p>(C) Electronic Arts Inc. Electronic Arts, EA, EA GAMES, the EA GAMES logo, Ultima, the UO logo and Britannia are trademarks or registered trademarks of Electronic Arts Inc. in the U.S. and/or other countries. All rights reserved.</p>
+
+  <footer>CPlusCrowdFilter 0.1 ・ 作者 BrauneRatte ・ 全文は LICENSE.txt</footer>
+</main>
+</body>
+</html>

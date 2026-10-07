@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<!--
+		The drawings of the crowd filters' icons in the actions window
+		( CPlusCrowdFilter.lua ACTIONS ).
+	-->
+	<Assets>
+		<Icon id="876015" texture="Icons/damage_ally_filter.dds" name="Ally Damage Filter" />
+		<Icon id="876016" texture="Icons/objhandle_filter.dds" name="Object Handle Filter" />
+		<Icon id="876033" texture="Icons/overhead_spell.dds" name="Overhead Spell Filter" />
+		<Icon id="876034" texture="Icons/self_arrow.dds" name="Self Arrow" />
+	</Assets>
+</Interface>
