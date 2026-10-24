@@ -506,8 +506,8 @@ end
 -- The six lists of the handles, with one entry for each object, in step.
 local HANDLE_LISTS = { "Names", "ObjectId", "XPos", "YPos", "IsMobile", "Notoriety" }
 
--- Whether the handle of the object at i is kept: a creature that is one of
--- the player's own pets or summons, or whose name is grey or red.
+-- Whether the handle at i is kept: a creature that is the player's own pet or
+-- summon, or is named grey or red. Grey is 3 and 4: one attacking you is 4.
 local function keepsHandle( objectsData, i )
 	if ( not objectsData.IsMobile[ i ] ) then
 		return false
@@ -516,7 +516,7 @@ local function keepsHandle( objectsData, i )
 		return true
 	end
 	local notoriety = objectsData.Notoriety[ i ]
-	return notoriety == NOTORIETY.GREY or notoriety == NOTORIETY.RED
+	return notoriety == NOTORIETY.GREY or notoriety == NOTORIETY.CRIMINAL or notoriety == NOTORIETY.RED
 end
 
 --[[
